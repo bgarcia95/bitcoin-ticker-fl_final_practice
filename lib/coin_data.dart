@@ -36,17 +36,27 @@ const bitCoinAverageURL =
 
 class CoinData {
   Future getData(String currency) async {
-    http.Response response = await http.get('$bitCoinAverageURL/BTC$currency');
+    Map<String, String> cryptoPrices = {};
 
-    if (response.statusCode == 200) {
-      try {
-        var decodedData = jsonDecode(response.body);
-        var lastPrice = decodedData['last'];
-        print(lastPrice);
-        return lastPrice;
-      } catch (e) {
-        print(e);
+    for (String crypto in cryptoList) {
+      http.Response response =
+          await http.get('$bitCoinAverageURL/$crypto$currency');
+
+      if (response.statusCode == 200) {
+        try {
+          var decodedData = jsonDecode(response.body);
+          double lastPrice = decodedData['last'];
+          cryptoPrices[crypto] = lastPrice.toStringAsFixed(0);
+        } catch (e) {
+          print(e);
+        }
+      } else {
+        print(response.statusCode);
+        throw 'Problem with the get request.';
       }
     }
+
+    print(cryptoPrices);
+    return cryptoPrices;
   }
 }
